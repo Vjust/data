@@ -21,6 +21,7 @@
  
 import json
 import psycopg2
+import sys
 
 file=open("/home/vjust/data/deli/inputs/testfile")
 lines=file.readlines()
@@ -31,18 +32,20 @@ conn.autocommit=True
 cur=conn.cursor()
 
 for ll in lines:
-	obj=json.loads(ll)
-	author=obj['author']
-	link_id=obj['id']
-	url=obj['link']
-	#type1=obj['type']
-	tags=obj['tags']
-	title=obj['title']
-	#value=obj['value']
-	updated=obj['updated']
-	print "author:%s\nlink_id:%s\nurl:%s\ntags:%s\ntitle:%s\nupdated:%s\n" % (author, link_id, url, tags, title,  updated)
-	cur.execute("insert into links (author, link_id, url, tags, title) values (%s , %s, %s, %s, %s)", (author, link_id, url, str(tags), title))
-
+	try:
+		obj=json.loads(ll)
+		author=obj['author']
+		link_id=obj['id']
+		url=obj['link']
+		#type1=obj['type']
+		tags=obj['tags']
+		title=obj['title']
+		#value=obj['value']
+		updated=obj['updated']
+		print "author:%s\nlink_id:%s\nurl:%s\ntags:%s\ntitle:%s\nupdated:%s\n" % (author, link_id, url, tags, title,  updated)
+		cur.execute("insert into links (author, link_id, url, tags, title) values (%s , %s, %s, %s, %s)", (author, link_id, url, str(tags), title))
+	except:
+		print "Unexpected error:" , sys.exc_info()[0] 
 cur.close()
 conn.close()
 conn.notices
