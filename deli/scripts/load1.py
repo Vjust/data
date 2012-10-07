@@ -22,30 +22,46 @@
 import json
 import psycopg2
 import sys
+import os
 
-file=open("/home/vjust/data/deli/inputs/testfile")
-lines=file.readlines()
-file.close()
+def conn_db():
+    conn=psycopg2.connect("dbname=deli user=vjust")
+    conn.autocommit=True
+    return conn
 
-conn=psycopg2.connect("dbname=deli user=vjust")
-conn.autocommit=True
+def proc_file (filename):
+    input_file=open("/home/vjust/data/deli/inputs/" + filename)   
+    error_count=0
+    row_count=0
+    for ll in input_file.readlines():
+        try:
+            obj=json.loads(ll)
+            author=obj['author']
+            link_id=obj['id']
+            url=obj['link']
+            #type1=obj['type']
+            tags=obj['tags']
+            title=obj['title']
+            #value=obj['value']
+            updated=obj['updated']
+            #print "author:%s\nlink_id:%s\nurl:%s\ntags:%s\ntitle:%s\nupdated:%s\n" % (author, link_id, url, tags, title,  updated)
+            cur.execute("insert into links (author, link_id, url, tags, title) values (%s , %s, %s, %s, %s)", (author, link_id, url, str(tags), title))
+            row_count=row_count+1
+        except:
+            print "~~~~~~~~~~~~~~~~ unexpected error ~~~~~~~~~~~~"
+            print obj
+            error_count=error_count+1
+
+    print " Total Rows inserted:{0:3d}  Errors:{1:6d}".format(row_count,error_count)
+
+
+conn=conn_db()
 cur=conn.cursor()
+for file in os.listdir('../inputs/')[1:2]:
+    if file.startswith('delix'):
+        proc_file(file)
 
-for ll in lines:
-	try:
-		obj=json.loads(ll)
-		author=obj['author']
-		link_id=obj['id']
-		url=obj['link']
-		#type1=obj['type']
-		tags=obj['tags']
-		title=obj['title']
-		#value=obj['value']
-		updated=obj['updated']
-		print "author:%s\nlink_id:%s\nurl:%s\ntags:%s\ntitle:%s\nupdated:%s\n" % (author, link_id, url, tags, title,  updated)
-		cur.execute("insert into links (author, link_id, url, tags, title) values (%s , %s, %s, %s, %s)", (author, link_id, url, str(tags), title))
-	except:
-		print "Unexpected error:" , sys.exc_info()[0] 
+
 cur.close()
 conn.close()
 conn.notices
