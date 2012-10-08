@@ -48,16 +48,16 @@ def proc_file (filename):
             cur.execute("insert into links (author, link_id, url, tags, title) values (%s , %s, %s, %s, %s)", (author, link_id, url, str(tags), title))
             row_count=row_count+1
         except:
-            print "~~~~~~~~~~~~~~~~ unexpected error ~~~~~~~~~~~~"
-            print obj
+            #print "~~~~~~~~~~~~~~~~ unexpected error ~~~~~~~~~~~~"
+            #print obj
             error_count=error_count+1
 
-    print " Total Rows inserted:{0:3d}  Errors:{1:6d}".format(row_count,error_count)
+    print " File: {2} Total Rows inserted:{0:3d}  Errors:{1:6d}".format(row_count,error_count,filename)
 
 
 conn=conn_db()
 cur=conn.cursor()
-for file in os.listdir('../inputs/')[1:2]:
+for file in os.listdir('../inputs/'):
     if file.startswith('delix'):
         proc_file(file)
 
